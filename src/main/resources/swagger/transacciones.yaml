@@ -1,0 +1,202 @@
+openapi: 3.0.3
+info:
+  title: Microservicio de Transacciones Bancarias
+  description: API para registrar y gestionar el historial de transacciones bancarias, incluyendo depósitos, retiros y transferencias entre cuentas.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local de desarrollo
+
+paths:
+  /transacciones/deposito:
+    post:
+      summary: Registrar un depósito
+      description: Permite registrar un depósito en una cuenta bancaria.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cuentaOrigen
+                - monto
+                - fecha
+              properties:
+                cuentaOrigen:
+                  type: string
+                  description: Número de cuenta donde se realizará el depósito.
+                  example: "123456789"
+                monto:
+                  type: number
+                  format: float
+                  description: Monto a depositar.
+                  example: 1000.50
+                fecha:
+                  type: string
+                  format: date-time
+                  description: Fecha y hora del depósito.
+                  example: "2024-10-05T14:48:00.000Z"
+      responses:
+        '201':
+          description: Depósito registrado con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransaccionResponse'
+        '400':
+          description: Error en los datos proporcionados.
+        '500':
+          description: Error interno del servidor.
+
+  /transacciones/retiro:
+    post:
+      summary: Registrar un retiro
+      description: Permite registrar un retiro de una cuenta bancaria, validando el saldo disponible.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cuentaOrigen
+                - monto
+                - fecha
+              properties:
+                cuentaOrigen:
+                  type: string
+                  description: Número de cuenta de donde se realizará el retiro.
+                  example: "123456789"
+                monto:
+                  type: number
+                  format: float
+                  description: Monto a retirar.
+                  example: 500.00
+                fecha:
+                  type: string
+                  format: date-time
+                  description: Fecha y hora del retiro.
+                  example: "2024-10-05T15:00:00.000Z"
+      responses:
+        '201':
+          description: Retiro registrado con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransaccionResponse'
+        '400':
+          description: Error en los datos proporcionados o saldo insuficiente.
+        '500':
+          description: Error interno del servidor.
+
+  /transacciones/transferencia:
+    post:
+      summary: Registrar una transferencia
+      description: Permite registrar una transferencia entre dos cuentas bancarias, validando el saldo disponible en la cuenta de origen.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cuentaOrigen
+                - cuentaDestino
+                - monto
+                - fecha
+              properties:
+                cuentaOrigen:
+                  type: string
+                  description: Número de cuenta de origen para la transferencia.
+                  example: "123456789"
+                cuentaDestino:
+                  type: string
+                  description: Número de cuenta de destino para la transferencia.
+                  example: "987654321"
+                monto:
+                  type: number
+                  format: float
+                  description: Monto a transferir.
+                  example: 300.00
+                fecha:
+                  type: string
+                  format: date-time
+                  description: Fecha y hora de la transferencia.
+                  example: "2024-10-05T16:30:00.000Z"
+      responses:
+        '201':
+          description: Transferencia registrada con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransaccionResponse'
+        '400':
+          description: Error en los datos proporcionados o saldo insuficiente.
+        '500':
+          description: Error interno del servidor.
+
+  /transacciones/historial:
+    get:
+      summary: Consultar historial de transacciones
+      description: Devuelve el historial de transacciones para una cuenta específica.
+      parameters:
+        - name: cuenta
+          in: query
+          required: true
+          description: Número de cuenta para la cual se desea consultar el historial.
+          schema:
+            type: string
+            example: "123456789"
+      responses:
+        '200':
+          description: Historial de transacciones recuperado con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransaccionResponse'
+        '400':
+          description: Error en los parámetros proporcionados.
+        '404':
+          description: No se encontró el historial para la cuenta indicada.
+        '500':
+          description: Error interno del servidor.
+
+components:
+  schemas:
+    TransaccionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identificador único de la transacción.
+          example: "tran_01"
+        tipo:
+          type: string
+          description: Tipo de transacción (Depósito, Retiro, Transferencia).
+          example: "Depósito"
+        monto:
+          type: number
+          format: float
+          description: Cantidad monetaria de la transacción.
+          example: 1000.50
+        fecha:
+          type: string
+          format: date-time
+          description: Fecha y hora de la transacción.
+          example: "2024-10-05T14:48:00.000Z"
+        cuentaOrigen:
+          type: string
+          description: Número de cuenta de origen de la transacción.
+          example: "123456789"
+        cuentaDestino:
+          type: string
+          description: Número de cuenta de destino para transferencias. Null para depósitos y retiros.
+          example: "987654321"
+        saldoDisponible:
+          type: number
+          format: float
+          description: Saldo disponible en la cuenta después de la transacción.
+          example: 2000.50
