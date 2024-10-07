@@ -1,0 +1,20 @@
+[{
+  "_id": {
+    "$numberLong": "1"
+  },
+  "nombre": "juan",
+  "apellido": "torres",
+  "dni": "62845968",
+  "email": "jtorres@gmail.com",
+  "_class": "com.nunez.microservicio.bootcamp.domain.Cliente"
+},
+{
+  "_id": {
+    "$numberLong": "2"
+  },
+  "nombre": "enrique",
+  "apellido": "nuñez",
+  "dni": "46566252",
+  "email": "enunez@gmail.com",
+  "_class": "com.nunez.microservicio.bootcamp.domain.Cliente"
+}]

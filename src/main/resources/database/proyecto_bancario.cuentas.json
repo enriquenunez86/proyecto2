@@ -1,0 +1,24 @@
+[{
+  "_id": {
+    "$numberLong": "1"
+  },
+  "numeroCuenta": "1234567890",
+  "saldo": 300,
+  "tipoCuenta": "CORRIENTE",
+  "clienteId": {
+    "$numberLong": "1"
+  },
+  "_class": "com.nunez.microservicio.bootcamp.domain.Cuenta"
+},
+{
+  "_id": {
+    "$numberLong": "2"
+  },
+  "numeroCuenta": "1357924680",
+  "saldo": 650,
+  "tipoCuenta": "AHORROS",
+  "clienteId": {
+    "$numberLong": "2"
+  },
+  "_class": "com.nunez.microservicio.bootcamp.domain.Cuenta"
+}]
