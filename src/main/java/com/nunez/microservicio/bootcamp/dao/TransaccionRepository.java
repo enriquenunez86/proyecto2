@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface TransaccionRepository extends MongoRepository<Transaccion, Long> {
     List<Transaccion> findByCuentaOrigen(String cuentaOrigen);
+    List<Transaccion> findByCuentaDestino(String cuentaDestino);
 }

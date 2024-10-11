@@ -2,12 +2,13 @@
   "_id": {
     "$numberLong": "1"
   },
-  "tipo": "Depósito",
-  "monto": 100,
+  "tipo": "Transferencia",
+  "monto": 30,
   "fecha": {
-    "$date": "2024-10-07T22:38:25.985Z"
+    "$date": "2024-10-10T19:01:11.300Z"
   },
   "cuentaOrigen": "1234567890",
+  "cuentaDestino": "1357924680",
   "_class": "com.nunez.microservicio.bootcamp.domain.Transaccion"
 },
 {

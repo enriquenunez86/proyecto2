@@ -1,100 +1,69 @@
 package com.nunez.microservicio.bootcamp.controller;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.nunez.microservicio.bootcamp.domain.Cuenta;
+import com.nunez.microservicio.bootcamp.service.CuentaService;
+import com.nunez.microservicio.bootcamp.service.CuentaSaldoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.nunez.microservicio.bootcamp.dao.CuentaRepository;
-import com.nunez.microservicio.bootcamp.domain.Cuenta;
-import com.nunez.microservicio.bootcamp.service.CuentaServiceImpl;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/cuentas")
 public class CuentaController {
 
+    private final CuentaService cuentaService;
+    private final CuentaSaldoService cuentaSaldoService;
+
     @Autowired
-    private CuentaServiceImpl cuentaService;
-    
-    @Autowired
-    private CuentaRepository cuentaRepository;
+    public CuentaController(CuentaService cuentaService, CuentaSaldoService cuentaSaldoService) {
+        this.cuentaService = cuentaService;
+        this.cuentaSaldoService = cuentaSaldoService;
+    }
 
     @GetMapping
-    public List<Cuenta> getAllCuentas() {
-        return cuentaService.findAll();
+    public ResponseEntity<List<Cuenta>> getAllCuentas() {
+        List<Cuenta> cuentas = cuentaService.findAll();
+        return ResponseEntity.ok(cuentas);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Cuenta> getCuentaById(@PathVariable Long id) {
-        Cuenta cuenta = cuentaService.findById(id);
-        return cuenta != null ? ResponseEntity.ok(cuenta) : ResponseEntity.notFound().build();
+        return cuentaService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PostMapping
     public ResponseEntity<Cuenta> createCuenta(@RequestBody @Validated Cuenta cuenta) {
-
         Cuenta createdCuenta = cuentaService.save(cuenta);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCuenta);
     }
 
     @PutMapping("/{id}/depositar/{monto}")
-    public ResponseEntity<?> depositarCuenta(@PathVariable Long id, @PathVariable Double monto) {
-        //Cuenta updatedCuenta = cuentaService.update(id, monto);
-    	//return updatedCuenta != null ? ResponseEntity.ok(updatedCuenta) : ResponseEntity.notFound().build();
+    public ResponseEntity<Object> depositarCuenta(@PathVariable Long id, @PathVariable Double monto) {
+        Optional<Cuenta> optionalCuenta = cuentaSaldoService.depositar(id, monto);
 
-    	Optional<Cuenta> oCuenta = cuentaRepository.findById(id);
-    	if(oCuenta.isPresent()) {
-    		Cuenta cuenta = oCuenta.get();
-    		double nuevoSaldo = cuenta.getSaldo() + monto;
-    		cuenta.setSaldo(nuevoSaldo);
-    		cuentaRepository.save(cuenta);
-    		
-    		return ResponseEntity.ok().body(cuenta);
-    		
-    	} else {
-    		
-    		return ResponseEntity.ok().body("Cuenta no existe");
-    	}
-    	
-    	
+        if (optionalCuenta.isPresent()) {
+            return ResponseEntity.ok(optionalCuenta.get()); // Retorna Cuenta si se encuentra
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta no encontrada"); // Retorna el mensaje de error
+        }
     }
-    
-    @PutMapping("/{id}/retirar/{monto}")
-    public ResponseEntity<?> retirarCuenta(@PathVariable Long id, @PathVariable Double monto) {
 
-    	Optional<Cuenta> oCuenta = cuentaRepository.findById(id);
-    	if(oCuenta.isPresent()) {
-    		Cuenta cuenta = oCuenta.get();
-    		
-    		if(cuenta.getSaldo()>=monto) {
-    			double nuevoSaldo = cuenta.getSaldo() - monto;
-        		cuenta.setSaldo(nuevoSaldo);
-        		cuentaRepository.save(cuenta);
-        		
-        		return ResponseEntity.ok().body(cuenta);
-    			
-    		} else {
-    			return ResponseEntity.ok("Saldo insuficiente...");
-    		}
-    		
-    		
-    	} else {
-    		
-    		return ResponseEntity.ok("Cuenta no existe");
-    	}
-    	
-    	
+    @PutMapping("/{id}/retirar/{monto}")
+    public ResponseEntity<Object> retirarCuenta(@PathVariable Long id, @PathVariable Double monto) {
+        Optional<Cuenta> optionalCuenta = cuentaSaldoService.retirar(id, monto);
+
+        if (optionalCuenta.isPresent()) {
+            return ResponseEntity.ok(optionalCuenta.get()); // Retorna Cuenta si se encuentra
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta no encontrada o saldo insuficiente"); // Retorna el mensaje de error
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -103,4 +72,3 @@ public class CuentaController {
         return ResponseEntity.noContent().build();
     }
 }
-

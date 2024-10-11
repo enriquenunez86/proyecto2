@@ -1,19 +1,15 @@
 package com.nunez.microservicio.bootcamp.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
 
-//import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Document(collection = "transacciones")
 @Entity
+@Document(collection = "transacciones")
 public class Transaccion {
 
     @Id
@@ -35,4 +31,16 @@ public class Transaccion {
     private String cuentaDestino; // Solo para transferencias
 
     private Double saldoDisponible;
+
+    // Constructor para crear una transacción
+    public static Transaccion create(String tipo, Double monto, LocalDateTime fecha, String cuentaOrigen, String cuentaDestino, Double saldoDisponible) {
+        Transaccion transaccion = new Transaccion();
+        transaccion.setTipo(tipo);
+        transaccion.setMonto(monto);
+        transaccion.setFecha(fecha);
+        transaccion.setCuentaOrigen(cuentaOrigen);
+        transaccion.setCuentaDestino(cuentaDestino);
+        transaccion.setSaldoDisponible(saldoDisponible);
+        return transaccion;
+    }
 }

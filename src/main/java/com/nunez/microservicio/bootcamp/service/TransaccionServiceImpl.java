@@ -8,23 +8,33 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// Implementación del servicio
 @Service
-public class TransaccionServiceImpl {
+public class TransaccionServiceImpl implements TransaccionService {
+
+    private final TransaccionRepository transaccionRepository;
+    private final ValidadorSaldo validadorSaldo;
 
     @Autowired
-    private TransaccionRepository transaccionRepository;
+    public TransaccionServiceImpl(TransaccionRepository transaccionRepository, ValidadorSaldo validadorSaldo) {
+        this.transaccionRepository = transaccionRepository;
+        this.validadorSaldo = validadorSaldo;
+    }
 
+    @Override
     public Transaccion registrarTransaccion(Transaccion transaccion) {
         transaccion.setFecha(LocalDateTime.now());
         return transaccionRepository.save(transaccion);
     }
 
-    public List<Transaccion> obtenerHistorial(String cuenta) {
-        return transaccionRepository.findByCuentaOrigen(cuenta);
+    @Override
+    public List<Transaccion> obtenerHistorialTransacciones() {
+        return transaccionRepository.findAll();
     }
 
+    @Override
     public boolean validarSaldo(Double saldo, Double monto) {
-        return saldo >= monto;
+        return validadorSaldo.validar(saldo, monto);
     }
-
 }
+
